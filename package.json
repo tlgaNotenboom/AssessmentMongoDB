@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "directories": {
-    "start": "nodemon server.js",
     "test": "test"
   },
   "scripts": {
+    "start": "nodemon server.js",
     "test": "mocha"
   },
   "repository": {
