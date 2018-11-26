@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const express = require('express')
 const ApiError = require('./src/ApiError')
 const user_routes = require('./src/routes/user.routes')
+const comment_routes = require('./src/routes/comment.routes')
 const morgan = require('morgan')
 
 
@@ -26,6 +27,7 @@ app.use("*", function(req, res, next) {
 
 
 app.use('/api', user_routes);
+app.use('/api', comment_routes);
 
 
 
