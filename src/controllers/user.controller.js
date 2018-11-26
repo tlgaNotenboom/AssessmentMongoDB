@@ -29,17 +29,14 @@ module.exports = {
     getAllUsers(req, res, next) {
         try {
             User.find({}, (err, users) => {
-                let userMap = {};
-
-                users.forEach(user => {
-                    userMap[user._id] = user;
-                });
-                if (userMap.length === 0) {
-                    res.status(200).send(userMap);
+                if (users.length !== 0) {
+                    res.status(200).send(users);
                 } else {
                     next(new ApiError("No users found", 404));
                 }
-            });
+            }).catch((err) => {
+                next(new ApiError(err.toString(), 400))
+            })
         } catch (ex) {
             const error = new ApiError(ex.message || ex.toString, ex.code);
             next(error);
