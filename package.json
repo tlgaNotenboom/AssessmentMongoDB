@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "directories": {
+    "start": "nodemon server.js",
     "test": "test"
   },
   "scripts": {
@@ -20,6 +21,8 @@
   },
   "homepage": "https://github.com/tlgaNotenboom/AssessmentMongoDB#readme",
   "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
     "mocha": "^5.2.0",
     "mongoose": "^5.3.13",
     "nodemon": "^1.18.6"
