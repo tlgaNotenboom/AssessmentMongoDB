@@ -6,13 +6,8 @@ module.exports = {
     getAllThreads(res, next){
         try {
             Thread.find({}, (err, threads) => {
-                let threadMap = {};
-
-                threads.forEach(thread => {
-                    threadMap[thread._id] = thread;
-                });
-                if (threadMap.length === 0) {
-                    res.status(200).send(threadMap);
+                if (threads.length !== 0) {
+                    res.status(200).send(threads);
                 } else {
                     next(new ApiError("No threads found", 404));
                 }
