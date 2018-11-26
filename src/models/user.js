@@ -10,6 +10,14 @@ const UserSchema = new Schema({
     },
     required: [true, 'Name is required.']
   },
+  password: {
+    type: String,
+    validate: {
+      validator: (password) => password.length > 2,
+      message: 'Password must be longer than 2 characters.'
+    },
+    required: [true, 'Password is required.']
+  },
   thread: [{
     type: Schema.Types.ObjectId,
     ref: 'thread'
