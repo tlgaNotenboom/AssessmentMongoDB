@@ -5,7 +5,7 @@ const ThreadSchema = new Schema ({
     username: {
         type: String,
         required: [true, 'Username is required.']
-    },
+    },  
     title: {
         type: String,
         required: [true, 'Title is required.']

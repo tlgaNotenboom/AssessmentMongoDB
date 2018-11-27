@@ -1,6 +1,6 @@
 const ApiError = require('../ApiError')
 const Comment = require('../models/Comment');
-const User = require('../models/User');
+const User = require('../models/user');
 
 module.exports = {
     addComment(req, res, next) {
