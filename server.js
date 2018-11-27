@@ -7,12 +7,14 @@ const comment_routes = require('./src/routes/comment.routes')
 const thread_routes = require('./src/routes/thread.routes')
 const morgan = require('morgan')
 
-if(process.env.NODE_ENV !== 'test'){
+// if(process.env.NODE_ENV !== 'test'){
 	Mongoose.connect("mongodb+srv://admin:admin123@studdit-ggmur.mongodb.net/test?retryWrites=true");
-}
+// }
 Mongoose.connection
     .once('open', () => console.log("Mongoose: connection open"))
-    .on("error", (err) => console.warn("Error", err));
+	.on("error", (err) => console.warn("Error", err))
+	
+	
 
 const port = process.env.PORT || 3000
 

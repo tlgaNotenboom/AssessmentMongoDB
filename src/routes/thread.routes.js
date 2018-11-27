@@ -8,7 +8,7 @@ routes.get("/thread/:id", ThreadController.getSpecificThread);
 routes.post("/thread", ThreadController.addThread);
 
 routes.put("/thread/:id", ThreadController.editThread);
-routes.delete("thread/:id", ThreadController.removeThread);
+routes.delete("/thread/:id", ThreadController.removeThread);
 
 
 module.exports = routes
