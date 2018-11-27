@@ -24,7 +24,8 @@ module.exports = {
         try {
             Thread.findById({
                 _id: threadId
-            }).select().populate("comments").exec().then((threads) => {
+            })
+            .then((threads) => {
                 if (threads.length !== 0) {
                     res.status(200).send(threads);
                 } else {

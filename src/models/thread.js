@@ -14,10 +14,15 @@ const ThreadSchema = new Schema ({
         type: String,
         required: [true, 'Content is required.']
     },
-    comments: [{ type: Schema.Types.ObjectId, 
-        ref: 'comment'}]
+    comments: [{ 
+        type: Schema.Types.ObjectId, 
+        ref: 'comment',
+        autopopulate: true
+    }]
     
 });
+
+ThreadSchema.plugin(require('mongoose-autopopulate'))
 const Thread = mongoose.model('thread', ThreadSchema);
 
 module.exports = Thread;
