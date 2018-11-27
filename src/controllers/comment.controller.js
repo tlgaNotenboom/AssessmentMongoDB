@@ -14,6 +14,7 @@ module.exports = {
                     next(new ApiError("No user found", 404))
                 } else {
                     Comment.create(commentProps).then((comment) => {
+                        if(!comment.parent) {
                         Thread.findByIdAndUpdate(commentProps.thread, 
                             {$push: {comments: comment._id}
                         }).then(() => {
@@ -21,10 +22,20 @@ module.exports = {
                         }).catch((err) => {
                             next(new ApiError(err.toString(), 400))
                         })
+                    } else {
+                        Comment.findByIdAndUpdate(comment.parent, 
+                            {$push: {comments: comment._id}})
+                        .then(() => {
+                            res.status(200).send(comment)
+                        }).catch((err) => {
+                            next(new ApiError(err.toString(), 400))
+                        })
+                    }
 
                     }).catch((err) => {
                         next(new ApiError(err.toString(), 400))
                     })
+
                 }
             }).catch((err) => {
                 next(new ApiError(err.toString(), 400))
