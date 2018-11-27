@@ -7,7 +7,7 @@ const comment_routes = require('./src/routes/comment.routes')
 const morgan = require('morgan')
 
 
-Mongoose.connect("mongodb://localhost/StudditMongo");
+Mongoose.connect("mongodb+srv://admin:admin123@studdit-ggmur.mongodb.net/test?retryWrites=true");
 Mongoose.connection
     .once('open', () => console.log("Mongoose: connection open"))
     .on("error", (err) => console.warn("Error", err));
