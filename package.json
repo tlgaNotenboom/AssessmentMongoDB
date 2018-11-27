@@ -28,6 +28,7 @@
     "express": "^4.16.4",
     "mocha": "^5.2.0",
     "mongoose": "^5.3.13",
+    "mongoose-autopopulate": "^0.9.0",
     "morgan": "^1.9.1",
     "nodemon": "^1.18.6"
   },
