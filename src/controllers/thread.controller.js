@@ -21,6 +21,24 @@ module.exports = {
         }
     },
 
+    getCommentSortedThreads(req, res, next) {
+        try {
+            Thread.find({}).select("-comments").sort({"comments": -1}).exec().then((threads) => {
+                if (threads.length !== 0) {
+                    res.status(200).send(threads);
+                } else {
+                    next(new ApiError("No threads found", 404));
+                }
+            }).catch((err) => {
+                next(new ApiError("No threads found", 404));
+            })
+        } catch (ex) {
+            const error = new ApiError(ex.message || ex.toString, ex.code);
+            next(error);
+            return;
+        }
+    },
+
     getSpecificThread(req, res, next) {
         const threadId = req.params.id;
         try {
