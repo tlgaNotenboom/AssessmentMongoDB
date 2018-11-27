@@ -1,0 +1,5 @@
+const assert = require('assert')
+const request = require('supertest')
+const app = require('../server')
+const mongoose = require('mongoose')
+const Thread = mongoose.model('thread')
