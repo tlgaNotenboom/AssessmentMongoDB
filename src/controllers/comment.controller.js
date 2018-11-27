@@ -1,6 +1,7 @@
 const ApiError = require('../ApiError')
-const Comment = require('../models/Comment');
+const Comment = require('../models/comment');
 const User = require('../models/user');
+const Thread = require('../models/thread')
 
 module.exports = {
     addComment(req, res, next) {
@@ -13,7 +14,14 @@ module.exports = {
                     next(new ApiError("No user found", 404))
                 } else {
                     Comment.create(commentProps).then((comment) => {
-                        res.status(200).send(comment)
+                        Thread.findByIdAndUpdate(commentProps.thread, 
+                            {$push: {comments: comment._id}
+                        }).then(() => {
+                            res.status(200).send(comment)
+                        }).catch((err) => {
+                            next(new ApiError(err.toString(), 400))
+                        })
+
                     }).catch((err) => {
                         next(new ApiError(err.toString(), 400))
                     })
