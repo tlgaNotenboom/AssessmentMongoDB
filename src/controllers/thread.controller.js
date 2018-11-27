@@ -1,9 +1,9 @@
 const Thread = require ('../models/thread')
-
+const ApiError = require('../ApiError');
 
 module.exports = {
 
-    getAllThreads(res, next){
+    getAllThreads(req, res, next){
         try {
             Thread.find({}, (err, threads) => {
                 if (threads.length !== 0) {
@@ -28,7 +28,7 @@ module.exports = {
                 if (threads) {
                     res.status(200).send(threads);
                 } else {
-                    next(new ApiError("No threads found", 404));
+                    next(new ApiError("No thread with that ID found", 404));
                 }
             });
         } catch (ex) {
@@ -61,15 +61,16 @@ module.exports = {
     },
     editThread(req, res, next) {
         const threadProps = req.body;
-
         try {
-            Thread.find({
-                _id: threadProps.id
+            Thread.findById({
+                _id: req.params.id
             }).then((foundThread) => {
-                } if (foundThread.length === 0) {
+                console.log(threadProps)
+                console.log(foundThread)
+                if (foundThread.length === 0) {
                     next(new ApiError("Thread not found", 404));
-                } else if (foundThread[0].title === threadProps.title) {
-                    Thread.findOneAndUpdate({_id: threadProps.id}, {$set:{content: threadProps.content, username: threadProps.username}}).then((editedThread) => {
+                } else if (foundThread.title === threadProps.title) {
+                    Thread.findOneAndUpdate({_id: req.params.id}, {$set:{content: threadProps.content, username: threadProps.username}}).then((editedThread) => {
                         editedThread.content = threadProps.content;
                         editedThread.username = threadProps.username;
                         res.status(200).send(editedThread)
@@ -77,7 +78,7 @@ module.exports = {
                         next(new ApiError(err.toString(), 400))
                     })
                 } else {
-                    next(new ApiError("Entered wrong password!", 401))
+                    next(new ApiError("You cannot change the title!", 401))
                 }
             }).catch((err) => {
                 next(new ApiError(err.toString(), 400))
@@ -100,9 +101,9 @@ module.exports = {
             }).then((foundThread) => {
                 if (foundThread.length === 0) {
                     next(new ApiError("Thread not found", 404));
-                } else(){
-                    //Delete thread, comments, upvotes en downvotes
-                } 
+                } //else(){
+                //     //Delete thread, comments, upvotes en downvotes
+                // }
             }).catch((err) => {
                 next(new ApiError(err.toString(), 400))
             })
@@ -112,6 +113,5 @@ module.exports = {
             next(error);
             return;
         }
-    }
     }
 };
