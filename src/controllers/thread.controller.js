@@ -1,5 +1,7 @@
 const Thread = require('../models/thread')
 const ApiError = require('../ApiError');
+const User = require('../models/user');
+const Comment = require('../models/comment')
 
 module.exports = {
 
@@ -101,17 +103,25 @@ module.exports = {
     },
 
     removeThread(req, res, next) {
-        const threadProps = req.body
+        const threadId = req.params.id
 
         try {
             Thread.find({
-                _id: threadProps.id
+                _id: threadId
             }).then((foundThread) => {
                 if (foundThread.length === 0) {
                     next(new ApiError("Thread not found", 404));
-                } //else(){
-                //     //Delete thread, comments, upvotes en downvotes
-                // }
+                } else {
+                    Comment.deleteMany({thread: foundThread[0]._id}).then(() => {
+                        Thread.findByIdAndDelete(threadId).then(() => {
+                        res.status(200).send({success: "Thread deleted!"})
+                        }).catch((err) => {
+                            next(new ApiError(err.toString(), 400))
+                        })
+                    }).catch((err) => {
+                        next(new ApiError(err.toString(), 400))
+                    })
+                }
             }).catch((err) => {
                 next(new ApiError(err.toString(), 400))
             })

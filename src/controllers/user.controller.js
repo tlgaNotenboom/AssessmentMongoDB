@@ -75,8 +75,7 @@ module.exports = {
                 } else if (foundUser.length === 0) {
                     next(new ApiError("User not found", 404));
                 } else if (foundUser[0].password === userProps.password) {
-                    User.findOneAndUpdate({name: userProps.name}, {$set:{password: userProps.newPassword}}).then((editedUser) => {
-                        editedUser.password = userProps.newPassword
+                    User.findOneAndUpdate({name: userProps.name}, {$set:{password: userProps.newPassword}}, {new: true}).then((editedUser) => {
                         res.status(200).send(editedUser)
                     }).catch((err) => {
                         next(new ApiError(err.toString(), 400))
