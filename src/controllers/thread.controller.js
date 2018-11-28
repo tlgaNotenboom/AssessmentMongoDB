@@ -49,7 +49,7 @@ module.exports = {
                 if (threads.length !== 0) {
                     res.status(200).send(threads);
                 } else {
-                    next(new ApiError("No thread with that ID found", 404));
+                    next(new ApiError("No thread with that ID found", 422));
                 }
             })
         } catch (ex) {
@@ -89,7 +89,7 @@ module.exports = {
                 console.log(threadProps)
                 console.log(foundThread)
                 if (foundThread.length === 0) {
-                    next(new ApiError("Thread not found", 404));
+                    next(new ApiError("Thread not found", 422));
                 } else if (foundThread.title === threadProps.title) {
                     Thread.findOneAndUpdate({
                         _id: req.params.id
@@ -128,7 +128,7 @@ module.exports = {
                 _id: threadId
             }).then((foundThread) => {
                 if (foundThread.length === 0) {
-                    next(new ApiError("Thread not found", 404));
+                    next(new ApiError("Thread not found", 422));
                 } else {
                     Comment.deleteMany({thread: foundThread[0]._id}).then(() => {
                         Thread.findByIdAndDelete(threadId).then(() => {
