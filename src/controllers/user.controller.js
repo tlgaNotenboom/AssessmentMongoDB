@@ -1,5 +1,7 @@
 const ApiError = require('../ApiError')
 const User = require('../models/user');
+const neo4j = require('../neo4j/neo4jdriver')
+
 
 module.exports = {
     addUser(req, res, next) {
@@ -11,6 +13,16 @@ module.exports = {
             }).then((foundUser) => {
                 if (foundUser.length === 0) {
                     User.create(userProps).then(user => {
+                        let session = neo4j.session()
+
+                        session.run("CREATE (n:User {name: $name})", {
+                                name: user.name
+                            })
+                            .then(() => {
+                                return session.run("MATCH (a:User) RETURN a")
+                            }).then((result) => {
+                                session.close()                                
+                            })
                         res.status(200).send(user)
                     }).catch((err) => {
                         next(new ApiError(err.toString(), 400))
@@ -75,7 +87,15 @@ module.exports = {
                 } else if (foundUser.length === 0) {
                     next(new ApiError("User not found", 404));
                 } else if (foundUser[0].password === userProps.password) {
-                    User.findOneAndUpdate({name: userProps.name}, {$set:{password: userProps.newPassword}}, {new: true}).then((editedUser) => {
+                    User.findOneAndUpdate({
+                        name: userProps.name
+                    }, {
+                        $set: {
+                            password: userProps.newPassword
+                        }
+                    }, {
+                        new: true
+                    }).then((editedUser) => {
                         res.status(200).send(editedUser)
                     }).catch((err) => {
                         next(new ApiError(err.toString(), 400))
@@ -105,8 +125,12 @@ module.exports = {
                 if (foundUser.length === 0) {
                     next(new ApiError("User not found", 404));
                 } else if (foundUser[0].password === userProps.password) {
-                    User.findOneAndDelete({name: userProps.name}).then((deletedUser) => {
-                        res.status(200).send({done: "User " + deletedUser.name + " deleted!" })
+                    User.findOneAndDelete({
+                        name: userProps.name
+                    }).then((deletedUser) => {
+                        res.status(200).send({
+                            done: "User " + deletedUser.name + " deleted!"
+                        })
                     }).catch((err) => {
                         next(new ApiError(err.toString(), 400))
                     })
@@ -122,5 +146,14 @@ module.exports = {
             next(error);
             return;
         }
+    },
+
+    befriendUsers(req, res, next) {
+        const friendProps = req.body
+
+        let session = neo4j.session()
+
+        session.run("MATCH (u:User), (f:User) WHERE u.name = $username AND f.name = $friendname CREATE (u)-[:IS_FRIEND]-(f)")
+        .then()
     }
 }
