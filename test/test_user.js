@@ -32,7 +32,6 @@ describe('Creating users', () => {
         it('Post to /api/user with a duplicate username returns 409', done => {
             
             User.count().then((count) => {
-                console.log("USERS IN THE DB: "+ count);
                 request(app)
                     .post('/api/user')
                     .send({
@@ -42,7 +41,6 @@ describe('Creating users', () => {
                     .expect(409)
                     .end((err, res) => {
                         User.count().then((newCount => {
-                            console.log("NEW AMOUNT OF USERS IN DB: "+newCount);
                             assert(count === newCount && res.status === 409);
                             done()
                         }))
