@@ -1,6 +1,7 @@
 const Thread = require('../models/thread');
 const ApiError = require('../ApiError');
 const Comment = require('../models/comment');
+const User = require('../models/user')
 
 module.exports = {
     castCommentUpvote(req, res, next){
@@ -9,6 +10,12 @@ module.exports = {
                 _id: req.params.id
             }).then((foundComment) => {
                 if (foundComment.length === 1) {
+                    let comment = foundComment[0]
+                    for(var i = 0, len = comment.upvotes.length; i < len; i++){
+                        if( comment.upvotes[i] === req.body.username){
+                            next(new ApiError("You already upvoted this comment!", 409))
+                        }
+                    };
                     Comment.findByIdAndUpdate(req.params.id, {
                         $push: {
                         upvotes: req.body.username
@@ -37,6 +44,12 @@ module.exports = {
                 _id: req.params.id
             }).then((foundComment) => {
                 if (foundComment.length === 1) {
+                    let comment = foundComment[0]
+                    for(var i = 0, len = comment.downvotes.length; i < len; i++){
+                        if( comment.downvotes[i] === req.body.username){
+                            next(new ApiError("You already downvoted this comment!", 409))
+                        }
+                    };
                     Comment.findByIdAndUpdate(req.params.id, {
                         $push: {
                         downvotes: req.body.username
@@ -65,6 +78,12 @@ module.exports = {
                 _id: req.params.id
             }).then((foundThread) => {
                 if (foundThread.length === 1) {
+                    let thread = foundThread[0]
+                    for(var i = 0, len = thread.upvotes.length; i < len; i++){
+                        if( thread.upvotes[i] === req.body.username){
+                            next(new ApiError("You already upvoted this thread!", 409))
+                        }
+                    };
                     Thread.findByIdAndUpdate(req.params.id, {
                         $push: {
                         upvotes: req.body.username
@@ -76,7 +95,7 @@ module.exports = {
                         next(new ApiError(err.toString(), 400))
                     })
                 } else {
-                    next(new ApiError("Thread not found"+foundThread.length, 409))
+                    next(new ApiError("Thread not found", 409))
                 }
             })
         } catch (ex) {
@@ -88,10 +107,27 @@ module.exports = {
 
     castThreadDownvote(req, res, next){
         try {
+            User.find({
+                name: req.body.username
+            })
+            .then((foundUser)=>{
+                if (foundUser.length === 0) {
+                    next(new ApiError("User not found", 401))
+                }
+            })
+            .catch((err) => {
+                next(new ApiError(err.toString(), 400))
+            })
             Thread.find({
                 _id: req.params.id
             }).then((foundThread) => {
                 if (foundThread.length === 1) {
+                    let thread = foundThread[0]
+                    for(var i = 0, len = thread.downvotes.length; i < len; i++){
+                        if( thread.downvotes[i] === req.body.username){
+                            next(new ApiError("You already downvoted this thread!", 409))
+                        }
+                    };
                     Thread.findByIdAndUpdate(req.params.id, {
                         $push: {
                         downvotes: req.body.username
@@ -103,7 +139,7 @@ module.exports = {
                         next(new ApiError(err.toString(), 400))
                     })
                 } else {
-                    next(new ApiError("Thread not found"+foundThread.length, 409))
+                    next(new ApiError("Thread not found", 409))
                 }
             })
         } catch (ex) {
