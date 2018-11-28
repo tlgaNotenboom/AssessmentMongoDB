@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "NODE_ENV=test nodemon server.js",
-    "test": "mocha"
+    "test": "nodemon --exec mocha -R min"
   },
   "repository": {
     "type": "git",

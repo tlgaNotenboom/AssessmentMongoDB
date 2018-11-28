@@ -5,7 +5,7 @@ before(done => {
     mongoose.connection
     .once('open', ()=> done())
     .on('error', err => {
-        console.warn('Warning', error);
+        console.warn('Warning', err);
     });
 });
 beforeEach((done) => {
