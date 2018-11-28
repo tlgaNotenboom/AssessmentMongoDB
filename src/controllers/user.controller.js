@@ -21,7 +21,7 @@ module.exports = {
                             .then(() => {
                                 return session.run("MATCH (a:User) RETURN a")
                             }).then((result) => {
-                                session.close()                                
+                                session.close()
                             })
                         res.status(200).send(user)
                     }).catch((err) => {
@@ -150,10 +150,91 @@ module.exports = {
 
     befriendUsers(req, res, next) {
         const friendProps = req.body
-
         let session = neo4j.session()
+        try {
+            
 
-        session.run("MATCH (u:User), (f:User) WHERE u.name = $username AND f.name = $friendname CREATE (u)-[:IS_FRIEND]-(f)")
-        .then()
+            User.find({
+                $or: [{
+                        name: friendProps.name1
+                    },
+                    {
+                        name: friendProps.name2
+                    }
+                ]
+            }).then((users) => {
+                if (users.length === 2) {
+
+                    session.run("MATCH (u:User), (f:User) WHERE u.name = $username AND f.name = $friendname CREATE UNIQUE (u)-[:FRIEND]->(f)", {
+                            username: friendProps.name1,
+                            friendname: friendProps.name2
+                        })
+                        .then(() => {
+                            res.status(200).send({
+                                success: friendProps.name1 + " is now friends with " + friendProps.name2
+                            })
+                        })
+                        .catch((err) => {
+                            next(new ApiError(err.toString(), 400))
+                        })
+                } else {
+                    next(new ApiError("One of these users does not exist", 404))
+                }
+            }).catch((err) => {
+                next(new ApiError(err.toString(), 400))
+            })
+
+
+        } catch (ex) {
+            const error = new ApiError(ex.message || ex.toString, ex.code);
+            next(error);
+            return;
+        }
+
+        session.close()
+    },
+
+    removeFriend(req, res, next) {
+        const friendProps = req.body
+        let session = neo4j.session()
+        try {
+            User.find({
+                $or: [{
+                        name: friendProps.name1
+                    },
+                    {
+                        name: friendProps.name2
+                    }
+                ]
+            }).then((users) => {
+                if (users.length === 2) {
+                    session.run("MATCH (u:User)-[r:FRIEND]-(f:User) WHERE u.name = $username AND f.name = $friendname DELETE r ", {
+                            username: friendProps.name1,
+                            friendname: friendProps.name2
+                        })
+                        .then(() => {
+                            
+                            res.status(200).send({
+                                success: friendProps.name1 + " is no longer friends with " + friendProps.name2
+                            })
+                        })
+                        .catch((err) => {
+                            
+                            next(new ApiError(err.toString(), 400))
+                        })
+                } else {
+                    next(new ApiError("One of these users does not exist", 404))
+                }
+            }).catch((err) => {
+                next(new ApiError(err.toString(), 400))
+            })
+
+
+        } catch (ex) {
+            const error = new ApiError(ex.message || ex.toString, ex.code);
+            next(error);
+            return;
+        }
+        session.close()
     }
 }
