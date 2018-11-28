@@ -5,10 +5,29 @@ const mongoose = require('mongoose')
 const Thread = mongoose.model('thread')
 
 beforeEach((done)=>{
-    let testThread = new Thread ({username: "beforeEachTestUsername", title: "beforeEachTestTitle", content: "beforeEachTestContent"});
-    testThread.save()
-        .then(()=> done())
-        .catch(()=> done())
+    request(app)
+    .post('/api/thread')
+    .send({
+        username: "beforeEachTestUsername", 
+        title: "beforeEachTestTitle", 
+        content: "beforeEachTestContent"
+    })
+    .then((thread)=> {
+        Thread.findOne({
+            title: "beforeEachTestTitle"
+        })
+    })
+   .then(()=> {
+        request(app)
+        .post('/api/comment')
+        .send({
+            content: "testComment",
+            username: "beforeEachTestUsername",
+            thread: "beforeEachTestTitle"     
+        })
+    })
+    .then(()=> done())
+    .catch((err)=> done(err))
 });
 
 describe("Creating Threads", ()=>{
@@ -30,9 +49,7 @@ describe("Creating Threads", ()=>{
                 })
         })
         .catch((err) => done(err))
-    })
-});
-describe("Editing Threads", ()=>{
+    }),
     it('Put to /api/thread/:id edits the username and content', done => {
         Thread.findOne({
             title: "beforeEachTestTitle"
@@ -59,5 +76,30 @@ describe("Editing Threads", ()=>{
                })            
        })
        .catch((err) => done(err))
+    })
+});
+describe("Remove Threads", ()=>{
+    it('removes a thread and it\'s comments', done =>{
+        Thread.find({
+            title: "beforeEachTestTitle"
+        })
+        .then((thread) =>{
+            console.log("!!!!!!!!!!THREAD LENGTH"+thread)
+            let threadId = thread._id
+            request(app)
+            .delete('/api/thread/'+threadId)
+        })
+        .then(()=>{
+            Thread.find({
+                title: "beforeEachTestTitle"
+           })
+           .then((threads)=>{
+               console.log("!!!!!!!!!!!!THREADS LENGTH"+threads)
+            assert(threads.length == 0)
+            done()
+        })
+        .catch((err) => done(err))
+        })
+        .catch((err) => done(err))
     })
 });
