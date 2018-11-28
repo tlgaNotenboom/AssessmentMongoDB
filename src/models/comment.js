@@ -24,6 +24,14 @@ const CommentSchema = new Schema({
         ref: 'comment',
         autopopulate: true
     }],
+    upvotes: [{
+        type: String,
+        ref: 'upvote'
+    }],
+    downvotes: [{
+        type: String,
+        ref: 'downvote'
+    }],
     deleted: {
         type: Boolean,
         default: false
