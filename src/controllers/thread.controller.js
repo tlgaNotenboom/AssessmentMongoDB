@@ -21,6 +21,24 @@ module.exports = {
         }
     },
 
+    getCommentSortedThreads(req, res, next) {
+        try {
+            Thread.find({}).select("-comments").sort({"comments": -1}).exec().then((threads) => {
+                if (threads.length !== 0) {
+                    res.status(200).send(threads);
+                } else {
+                    next(new ApiError("No threads found", 404));
+                }
+            }).catch((err) => {
+                next(new ApiError("No threads found", 404));
+            })
+        } catch (ex) {
+            const error = new ApiError(ex.message || ex.toString, ex.code);
+            next(error);
+            return;
+        }
+    },
+
     getSpecificThread(req, res, next) {
         const threadId = req.params.id;
         try {
@@ -31,7 +49,7 @@ module.exports = {
                 if (threads.length !== 0) {
                     res.status(200).send(threads);
                 } else {
-                    next(new ApiError("No thread with that ID found", 404));
+                    next(new ApiError("No thread with that ID found", 422));
                 }
             })
         } catch (ex) {
@@ -71,7 +89,7 @@ module.exports = {
                 console.log(threadProps)
                 console.log(foundThread)
                 if (foundThread.length === 0) {
-                    next(new ApiError("Thread not found", 404));
+                    next(new ApiError("Thread not found", 422));
                 } else if (foundThread.title === threadProps.title) {
                     Thread.findOneAndUpdate({
                         _id: req.params.id
@@ -110,7 +128,7 @@ module.exports = {
                 _id: threadId
             }).then((foundThread) => {
                 if (foundThread.length === 0) {
-                    next(new ApiError("Thread not found", 404));
+                    next(new ApiError("Thread not found", 422));
                 } else {
                     Comment.deleteMany({
                         thread: foundThread[0]._id

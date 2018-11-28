@@ -27,7 +27,11 @@ const CommentSchema = new Schema({
     deleted: {
         type: Boolean,
         default: false
+    },
+    upvotes: {
+        
     }
+    
 
         
 });
