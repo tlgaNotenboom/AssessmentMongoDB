@@ -4,6 +4,12 @@ const app = require('../server')
 const mongoose = require('mongoose')
 const User = mongoose.model('user')
 
+beforeEach((done)=>{
+    let testUser = new User ({name: "beforeEachTestUser", password: "beforeEachTestUser"});
+    testUser.save()
+        .then(()=> done())
+});
+
 describe('Creating users', () => {
 
     it('Post to /api/user creates a new user', done => {
@@ -11,8 +17,8 @@ describe('Creating users', () => {
                 request(app)
                     .post('/api/user')
                     .send({
-                        name: "test",
-                        password: "test"
+                        name: "createdTestUser",
+                        password: "createdTestUser"
                     })
                     .end(() => {
                         User.count().then((newCount => {
@@ -24,12 +30,13 @@ describe('Creating users', () => {
         }),
 
         it('Post to /api/user with a duplicate username returns 409', done => {
+            
             User.count().then((count) => {
                 request(app)
                     .post('/api/user')
                     .send({
-                        name: "test",
-                        password: "test"
+                        name: "beforeEachTestUser",
+                        password: "beforeEachTestUser"
                     })
                     .expect(409)
                     .end((err, res) => {
@@ -43,44 +50,43 @@ describe('Creating users', () => {
 })
 
 
-describe('Changing a password', () => {
+ describe('Changing a password', () => {
 
-    it("Put to /api/user changes a users password", done => {
-            User.findOne({
-                name: "test"
+     it("Put to /api/user changes a users password", done => {
+             User.findOne({
+                 name: "beforeEachTestUser"
             }).then((user) => {
                 request(app)
                     .put("/api/user")
                     .send({
-                        name: "test",
-                        password: "test",
+                        name: "beforeEachTestUser",
+                        password: "beforeEachTestUser",
                         newPassword: "NewPass"
                     })
                     .end((err, res) => {
                         User.findOne({
-                            name: "test"
+                            name: "beforeEachTestUser"
                         }).then((newUser) => {
-                            assert(user.password !== newUser.password)
+                            assert(newUser.password == "NewPass")
                             done()
                         })
                     })
             })
         }),
-
         it("Put to /api/user with no newPassword property returns 422", done => {
             User.findOne({
-                name: "test"
+                name: "beforeEachTestUser"
             }).then((user) => {
                 request(app)
                     .put("/api/user")
                     .send({
-                        name: "test",
-                        password: "test",
+                        name: "beforeEachTestUser",
+                        password: "beforeEachTestUser",
                     })
                     .expect(422)
                     .end((err, res) => {
                         User.findOne({
-                            name: "test"
+                            name: "beforeEachTestUser"
                         }).then((newUser) => {
                             assert(user.password === newUser.password && res.status === 422)
                             done()
@@ -88,13 +94,12 @@ describe('Changing a password', () => {
                     })
             })
         }),
-
         it("Put to /api/user with a non existant user returns 404", done => {
             request(app)
                 .put("/api/user")
                 .send({
-                    name: "test123",
-                    password: "test",
+                    name: "wrongUser",
+                    password: "wrongPassword",
                     newPassword: "NewPass"
                 })
                 .expect(404)
@@ -103,22 +108,21 @@ describe('Changing a password', () => {
                     done()
                 })
         }),
-
         it("Put to /api/user with wrong password returns 401", done => {
             User.findOne({
-                name: "test"
+                name: "beforeEachTestUser"
             }).then((user) => {
                 request(app)
                     .put("/api/user")
                     .send({
-                        name: "test",
-                        password: "test123",
+                        name: "beforeEachTestUser",
+                        password: "wrongPassword",
                         newPassword: "NewPass"
                     })
                     .expect(401)
                     .end((err, res) => {
                         User.findOne({
-                            name: "test"
+                            name: "beforeEachTestUser"
                         }).then((newUser) => {
                             assert(user.password === newUser.password && res.status === 401)
                             done()
@@ -126,7 +130,7 @@ describe('Changing a password', () => {
                     })
             })
         })
-})
+});
 
 
 describe('Removing a user', () => {
@@ -135,22 +139,22 @@ describe('Removing a user', () => {
         request(app)
             .delete("/api/user")
             .send({
-                name: "test123",
-                password: "test"
+                name: "wrongUser",
+                password: "wrongPassword"
             })
             .expect(404)
             .end((err, res) => {
                 assert(res.status === 404)
                 done()
             })
-    })
+    }),
 
     it("Delete to /api/user with wrong password returns 401", done => {
         request(app)
             .delete("/api/user")
             .send({
-                name: "test",
-                password: "test123",
+                name: "beforeEachTestUser",
+                password: "wrongPassword",
             })
             .expect(401)
             .end((err, res) => {
@@ -159,17 +163,16 @@ describe('Removing a user', () => {
 
             })
     }),
-
     it("Delete to /api/user deletes a user", done => {
         request(app)
                     .delete("/api/user")
                     .send({
-                        name: "test",
-                        password: "NewPass"
+                        name: "beforeEachTestUser",
+                        password: "beforeEachTestUser"
                     })
                     .end((err, res) => {
                         User.find({
-                            name: "test"
+                            name: "beforeEachTestUser"
                         }).then((deletedUser) => {
                             assert(deletedUser.length === 0)
                             done()
@@ -177,3 +180,4 @@ describe('Removing a user', () => {
                     })
     })
 })
+

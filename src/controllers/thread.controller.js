@@ -130,17 +130,24 @@ module.exports = {
                 if (foundThread.length === 0) {
                     next(new ApiError("Thread not found", 422));
                 } else {
-                    Comment.deleteMany({thread: foundThread[0]._id}).then(() => {
-                        Thread.findByIdAndDelete(threadId).then(() => {
+                    Comment.deleteMany({
+                        thread: foundThread[0]._id
+                    })
+                    .then(() => {
+                        Thread.findByIdAndDelete(threadId)
+                        .then(() => {
                         res.status(200).send({success: "Thread deleted!"})
-                        }).catch((err) => {
+                        })
+                        .catch((err) => {
                             next(new ApiError(err.toString(), 400))
                         })
-                    }).catch((err) => {
+                    })
+                    .catch((err) => {
                         next(new ApiError(err.toString(), 400))
                     })
                 }
-            }).catch((err) => {
+            })
+            .catch((err) => {
                 next(new ApiError(err.toString(), 400))
             })
 
