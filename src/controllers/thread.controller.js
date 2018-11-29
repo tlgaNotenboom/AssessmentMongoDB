@@ -41,7 +41,6 @@ module.exports = {
 
     getSpecificThread(req, res, next) {
         const threadId = req.params.id;
-        try {
             Thread.findById({
                 _id: threadId
             })
@@ -49,15 +48,12 @@ module.exports = {
                 if (threads.length !== 0) {
                     res.status(200).send(threads);
                 } else {
-                    next(new ApiError("No thread with that ID found", 422));
+                    next(new ApiError("Thread not found", 422));
                 }
-            })
-        } catch (ex) {
-            const error = new ApiError(ex.message || ex.toString, ex.code);
-            next(error);
-            return;
-        }
-    },
+            }).catch((err) => {
+                next(new ApiError("Thread not found", 422))
+            });
+            },
     addThread(req, res, next) {
         try {
             const threadProps = req.body
