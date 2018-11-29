@@ -1,5 +1,7 @@
 const Thread = require('../models/thread')
 const ApiError = require('../ApiError');
+const User = require('../models/user');
+const Comment = require('../models/comment')
 
 module.exports = {
 
@@ -19,6 +21,24 @@ module.exports = {
         }
     },
 
+    getCommentSortedThreads(req, res, next) {
+        try {
+            Thread.find({}).select("-comments").sort({"comments": -1}).exec().then((threads) => {
+                if (threads.length !== 0) {
+                    res.status(200).send(threads);
+                } else {
+                    next(new ApiError("No threads found", 404));
+                }
+            }).catch((err) => {
+                next(new ApiError("No threads found", 404));
+            })
+        } catch (ex) {
+            const error = new ApiError(ex.message || ex.toString, ex.code);
+            next(error);
+            return;
+        }
+    },
+
     getSpecificThread(req, res, next) {
         const threadId = req.params.id;
         try {
@@ -29,7 +49,7 @@ module.exports = {
                 if (threads.length !== 0) {
                     res.status(200).send(threads);
                 } else {
-                    next(new ApiError("No thread with that ID found", 404));
+                    next(new ApiError("No thread with that ID found", 422));
                 }
             })
         } catch (ex) {
@@ -69,7 +89,7 @@ module.exports = {
                 console.log(threadProps)
                 console.log(foundThread)
                 if (foundThread.length === 0) {
-                    next(new ApiError("Thread not found", 404));
+                    next(new ApiError("Thread not found", 422));
                 } else if (foundThread.title === threadProps.title) {
                     Thread.findOneAndUpdate({
                         _id: req.params.id
@@ -101,18 +121,33 @@ module.exports = {
     },
 
     removeThread(req, res, next) {
-        const threadProps = req.body
+        const threadId = req.params.id
 
         try {
             Thread.find({
-                _id: threadProps.id
+                _id: threadId
             }).then((foundThread) => {
                 if (foundThread.length === 0) {
-                    next(new ApiError("Thread not found", 404));
-                } //else(){
-                //     //Delete thread, comments, upvotes en downvotes
-                // }
-            }).catch((err) => {
+                    next(new ApiError("Thread not found", 422));
+                } else {
+                    Comment.deleteMany({
+                        thread: foundThread[0]._id
+                    })
+                    .then(() => {
+                        Thread.findByIdAndDelete(threadId)
+                        .then(() => {
+                        res.status(200).send({success: "Thread deleted!"})
+                        })
+                        .catch((err) => {
+                            next(new ApiError(err.toString(), 400))
+                        })
+                    })
+                    .catch((err) => {
+                        next(new ApiError(err.toString(), 400))
+                    })
+                }
+            })
+            .catch((err) => {
                 next(new ApiError(err.toString(), 400))
             })
 
