@@ -117,7 +117,7 @@ module.exports = {
 
     removeUser(req, res, next) {
         const userProps = req.body
-
+        let session = neo4j.session()
         try {
             User.find({
                 name: userProps.name
@@ -128,9 +128,15 @@ module.exports = {
                     User.findOneAndDelete({
                         name: userProps.name
                     }).then((deletedUser) => {
-                        res.status(200).send({
-                            done: "User " + deletedUser.name + " deleted!"
+                        session.run("MATCH (u:User) WHERE u.name = $name DELETE u", {name: deletedUser.name})
+                        .then(() => {
+                            res.status(200).send({
+                                done: "User " + deletedUser.name + " deleted!"
+                            })
+                        }).catch((err) => {
+                            next(new ApiError(err.toString(), 400))
                         })
+                        
                     }).catch((err) => {
                         next(new ApiError(err.toString(), 400))
                     })
