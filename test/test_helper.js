@@ -38,16 +38,17 @@ beforeEach((done) => {
 })
 
 beforeEach((done) => {
-    let testUser = new User({
-        name: "beforeEachTestUser",
-        password: "beforeEachTestUser"
-    });
-    testUser.save()
+  request(app)
+  .post('/api/user')
+  .send({
+    name: "beforeEachTestUser",
+    password: "beforeEachTestUser"
+  })
         .then(() => {
             return request(app)
                 .post('/api/thread')
                 .send({
-                    username: "beforeEachTestUsername",
+                    username: "beforeEachTestUser",
                     title: "beforeEachTestTitle",
                     content: "beforeEachTestContent"
                 })
@@ -56,14 +57,14 @@ beforeEach((done) => {
                         title: "beforeEachTestTitle"
                     })
                 })
-                .then(() => {
+                .then((thread) => {
                     return request(app)
                         .post('/api/comment')
                         .send({
                             content: "testComment",
-                            username: "beforeEachTestUsername",
-                            thread: "beforeEachTestTitle"
-                        })
+                            username: "beforeEachTestUser",
+                            thread: thread._id                  
+                          })
                 })
         })
         .then(() => done())
