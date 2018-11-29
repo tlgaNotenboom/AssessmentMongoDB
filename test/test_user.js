@@ -4,15 +4,6 @@ const app = require('../server')
 const mongoose = require('mongoose')
 const User = mongoose.model('user')
 
-beforeEach((done) => {
-    let testUser = new User({
-        name: "beforeEachTestUser",
-        password: "beforeEachTestUser"
-    });
-    testUser.save()
-        .then(() => done())
-});
-
 describe('Creating users', () => {
 
     it('Post to /api/user creates a new user', done => {
@@ -166,7 +157,7 @@ describe('Removing a user', () => {
 
                 })
         }),
-        
+
         it("Delete to /api/user deletes a user", done => {
             request(app)
                 .delete("/api/user")

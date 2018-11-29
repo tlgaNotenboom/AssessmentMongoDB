@@ -12,6 +12,7 @@ const morgan = require('morgan')
 		console.log("Mongoose is connected to Atlas remote DB")
         Mongoose.connect("mongodb+srv://admin:admin123@studdit-ggmur.mongodb.net/test?retryWrites=true", { useNewUrlParser: true } );
 	}
+
 	
 	
 Mongoose.connection

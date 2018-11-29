@@ -35,15 +35,42 @@ const CommentSchema = new Schema({
     deleted: {
         type: Boolean,
         default: false
+    },          
+},
+{
+    toObject: {
+        virtuals: true
     },
-    upvotes: {
-        
+    toJSON: {
+        virtuals: true 
     }
-    
-
-        
 });
 
+CommentSchema.virtual('Upvotes').get(function(){
+    if(this.upvotes === undefined){
+        return 0
+    }
+    return this.upvotes.length
+});
+CommentSchema.virtual('Downvotes').get(function(){
+    if(this.downvotes === undefined){
+        return 0
+    }
+    return this.downvotes.length
+});
+CommentSchema.virtual('Karma').get(function(){
+    if(this.upvotes === undefined){
+        if(this.downvotes === undefined){
+            return 0
+        }else {
+            return this.downvotes.length
+        }
+    }else if(this.downvotes === undefined){
+        return this.upvotes.length
+    }else{
+        return this.upvotes.length - this.downvotes.length
+    }
+});
 CommentSchema.plugin(require('mongoose-autopopulate'))
 const Comment = mongoose.model('comment', CommentSchema);
 
