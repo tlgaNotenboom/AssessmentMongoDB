@@ -9,16 +9,16 @@ const vote_routes = require('./src/routes/vote.routes')
 const morgan = require('morgan')
 
     if(process.env.NODE_ENV !== 'test'){
-	// Mongoose.connect("mongodb+srv://admin:admin123@studdit-ggmur.mongodb.net/test?retryWrites=true");
-	Mongoose.connect("mongodb://localhost:27017") ;
+        Mongoose.connect("mongodb+srv://admin:admin123@studdit-ggmur.mongodb.net/test?retryWrites=true", { useNewUrlParser: true } );
 	}
+	
 	
 Mongoose.connection
     .once('open', () => console.log("Mongoose: connection open"))
 	.on("error", (err) => console.warn("Error", err))
 	
 	
-
+	
 const port = process.env.PORT || 3000
 
 let app = express();
@@ -32,12 +32,10 @@ app.use("*", function(req, res, next) {
     next();
 });
 
-
 app.use('/api', user_routes);
 app.use('/api', comment_routes);
 app.use('/api', thread_routes);
 app.use('/api', vote_routes);
-
 
 app.use('*', (req, res, next) => {
 	console.log('Non-existing endpoint');

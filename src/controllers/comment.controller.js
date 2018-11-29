@@ -11,7 +11,7 @@ module.exports = {
                 name: commentProps.username
             }).then((foundUser) => {
                 if (foundUser.length === 0) {
-                    next(new ApiError("No user found", 404))
+                    next(new ApiError("No user found", 422))
                 } else {
                     Comment.create(commentProps)
                     .then((comment) => {
@@ -70,7 +70,7 @@ module.exports = {
                             next(new ApiError(err.toString(), 400))
                         })
                 } else {
-                    next(new ApiError("Comment already deleted", 404))
+                    next(new ApiError("Comment already deleted", 422))
                 }
             })
 
