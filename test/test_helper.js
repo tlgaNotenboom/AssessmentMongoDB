@@ -52,7 +52,6 @@ beforeEach((done) => {
             thread: "beforeEachTestTitle"     
         })
     })
-    .catch(console.log("err"))
   })
   .then(()=> done())
   .catch((err)=> done(err))
