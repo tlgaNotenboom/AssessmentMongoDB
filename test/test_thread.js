@@ -4,32 +4,6 @@ const app = require('../server')
 const mongoose = require('mongoose')
 const Thread = mongoose.model('thread')
 
-beforeEach((done)=>{
-    request(app)
-    .post('/api/thread')
-    .send({
-        username: "beforeEachTestUsername", 
-        title: "beforeEachTestTitle", 
-        content: "beforeEachTestContent"
-    })
-    .then((thread)=> {
-        Thread.findOne({
-            title: "beforeEachTestTitle"
-        })
-    })
-   .then(()=> {
-        request(app)
-        .post('/api/comment')
-        .send({
-            content: "testComment",
-            username: "beforeEachTestUsername",
-            thread: "beforeEachTestTitle"     
-        })
-    })
-    .then(()=> done())
-    .catch((err)=> done(err))
-});
-
 describe("Creating Threads", ()=>{
     it('Post to /api/thread creates a new thread', done => {
         Thread.count()
