@@ -27,7 +27,7 @@ beforeEach((done) => {
         comments.drop(() => {
             threads.drop(() => {
                 session.run("MATCH (u:User)-[r:FRIEND]-(:User) WHERE u.name = 'createdTestUser' DELETE r").then(() => {
-                    session.run("MATCH (u:User) WHERE u.name = 'createdTestUser' OR u.name = 'createdTestUser1' OR u.name = 'createdTestUser2' DELETE u")
+                    session.run("MATCH (u:User) WHERE u.name = 'createdTestUser' OR u.name = 'createdTestUser1' OR u.name = 'createdTestUser2' OR u.name = 'beforeEachTestUser'  DELETE u")
                 }).then(() => {
                     session.close()
                     done()
