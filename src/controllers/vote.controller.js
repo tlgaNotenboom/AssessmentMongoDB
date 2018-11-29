@@ -5,7 +5,6 @@ const User = require('../models/user')
 
 module.exports = {
     castCommentUpvote(req, res, next){
-        try {
             Comment.find({
                 _id: req.params.id
             }).then((foundComment) => {
@@ -18,17 +17,41 @@ module.exports = {
                                     $in: [
                                     req.body.username
                                     ]
-                                }}
-                            },
+                                },
+                            }},
                                 { new: true })
-                            .then(comment=> {
+                            .then((comment) => {
                                 res.status(200).send(comment)
                             })
                             .catch((err)=> {
                                 next(new ApiError(err.toString(), 400))
                             })
+                        }else if(comment.downvotes.includes(req.body.username)){
+                            Comment.findByIdAndUpdate(req.params.id, {
+                                $pull: {
+                                    downvotes: {
+                                        $in: [
+                                        req.body.username
+                                        ]
+                                    },
+                                }
+                                })
+                                .then( () =>
+                                        Comment.findByIdAndUpdate(req.params.id, {
+                                        $push: {
+                                        upvotes: req.body.username
+                                        }
+                                    }, 
+                                    {new: true})
+                                )
+                                .then((comment)=> {
+                                    res.status(200).send(comment)
+                                })
+                                .catch((err)=> {
+                                    next(new ApiError(err.toString(), 400))
+                                })
                         }else{
-                    Comment.findByIdAndUpdate(req.params.id, {
+                        Comment.findByIdAndUpdate(req.params.id, {
                         $push: {
                         upvotes: req.body.username
                         }
@@ -44,11 +67,6 @@ module.exports = {
                     next(new ApiError("comment not found", 409))
                 }
             })
-        } catch (ex) {
-            const error = new ApiError(ex.message || ex.toString, ex.code);
-            next(error);
-            return;
-        }
     },
 
     castCommentDownvote(req, res, next){

@@ -8,9 +8,11 @@ const thread_routes = require('./src/routes/thread.routes')
 const vote_routes = require('./src/routes/vote.routes')
 const morgan = require('morgan')
 
-// if(process.env.NODE_ENV !== 'test'){
-	Mongoose.connect("mongodb+srv://admin:admin123@studdit-ggmur.mongodb.net/test?retryWrites=true");
-// }
+    if(process.env.NODE_ENV !== 'test'){
+	// Mongoose.connect("mongodb+srv://admin:admin123@studdit-ggmur.mongodb.net/test?retryWrites=true");
+	Mongoose.connect("mongodb://localhost:27017") ;
+	}
+	
 Mongoose.connection
     .once('open', () => console.log("Mongoose: connection open"))
 	.on("error", (err) => console.warn("Error", err))
