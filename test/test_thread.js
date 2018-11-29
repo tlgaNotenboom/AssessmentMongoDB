@@ -71,22 +71,20 @@ describe("Creating Threads", () => {
 
     describe("Remove Threads", () => {
         it('removes a thread and its comments', done => {
+            let savedThread
             Thread.findOne({
                     title: "beforeEachTestTitle"
                 })
                 .then((thread) => {
-                    console.log(" !!!!!!!!!!!!!!!!!!!!!!!! " + thread)
+                    savedThread = thread
                     return request(app)
                         .delete("/api/thread/" + thread._id)
-                        .end()
                 })
                 .then(() => {
-
-                    return Thread.findById(thread._id)
+                    return Thread.findById(savedThread._id)
                 })
                 .then((deletedThread) => {
-
-                    assert(deletedThread === undefined)
+                    assert(deletedThread === null)
                     done()
                 })
                 .catch((err) => {
