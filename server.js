@@ -9,8 +9,10 @@ const vote_routes = require('./src/routes/vote.routes')
 const morgan = require('morgan')
 
     if(process.env.NODE_ENV !== 'test'){
-        Mongoose.connect("mongodb+srv://admin:admin123@studdit-ggmur.mongodb.net/test?retryWrites=true", { useNewUrlParser: true } );
+	//    Mongoose.connect("mongodb+srv://admin:admin123@studdit-ggmur.mongodb.net/test?retryWrites=true", { useNewUrlParser: true } );
+	Mongoose.connect("mongodb://localhost:27017")
 	}
+
 	
 	
 Mongoose.connection
