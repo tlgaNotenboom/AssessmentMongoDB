@@ -13,7 +13,8 @@ module.exports = {
                 if (foundUser.length === 0) {
                     next(new ApiError("No user found", 422))
                 } else {
-                    Comment.create(commentProps).then((comment) => {
+                    Comment.create(commentProps)
+                    .then((comment) => {
                         if (!comment.parent) {
                             Thread.findByIdAndUpdate(commentProps.thread, {
                                 $push: {

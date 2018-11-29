@@ -14,6 +14,14 @@ const ThreadSchema = new Schema ({
         type: String,
         required: [true, 'Content is required.']
     },
+    upvotes: [{
+        type: String,
+        ref: 'upvotes'
+    }],
+    downvotes: [{
+        type: String,
+        ref: 'downvotes'
+    }],
     comments: [{ 
         type: Schema.Types.ObjectId, 
         ref: 'comment',

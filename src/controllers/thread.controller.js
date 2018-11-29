@@ -65,7 +65,8 @@ module.exports = {
                 _id: threadProps.id
             }).then((foundThread) => {
                 if (foundThread.length === 0) {
-                    Thread.create(threadProps).then(thread => {
+                    Thread.create(threadProps)
+                    .then(thread => {
                         res.status(200).send(thread)
                     }).catch((err) => {
                         next(new ApiError(err.toString(), 400))
