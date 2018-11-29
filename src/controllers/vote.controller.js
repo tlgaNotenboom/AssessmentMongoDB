@@ -11,11 +11,23 @@ module.exports = {
             }).then((foundComment) => {
                 if (foundComment.length === 1) {
                     let comment = foundComment[0]
-                    for(var i = 0, len = comment.upvotes.length; i < len; i++){
-                        if( comment.upvotes[i] === req.body.username){
-                            next(new ApiError("You already upvoted this comment!", 409))
-                        }
-                    };
+                    if(comment.upvotes.includes(req.body.username)){
+                        Comment.findByIdAndUpdate(req.params.id, {
+                            $pull: {
+                                upvotes: {
+                                    $in: [
+                                    req.body.username
+                                    ]
+                                }}
+                            },
+                                { new: true })
+                            .then(comment=> {
+                                res.status(200).send(comment)
+                            })
+                            .catch((err)=> {
+                                next(new ApiError(err.toString(), 400))
+                            })
+                        }else{
                     Comment.findByIdAndUpdate(req.params.id, {
                         $push: {
                         upvotes: req.body.username
@@ -27,6 +39,7 @@ module.exports = {
                     }).catch((err) => {
                         next(new ApiError(err.toString(), 400))
                     })
+                }
                 } else {
                     next(new ApiError("comment not found", 409))
                 }
