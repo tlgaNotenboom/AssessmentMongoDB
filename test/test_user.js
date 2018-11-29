@@ -4,10 +4,13 @@ const app = require('../server')
 const mongoose = require('mongoose')
 const User = mongoose.model('user')
 
-beforeEach((done)=>{
-    let testUser = new User ({name: "beforeEachTestUser", password: "beforeEachTestUser"});
+beforeEach((done) => {
+    let testUser = new User({
+        name: "beforeEachTestUser",
+        password: "beforeEachTestUser"
+    });
     testUser.save()
-        .then(()=> done())
+        .then(() => done())
 });
 
 describe('Creating users', () => {
@@ -30,7 +33,7 @@ describe('Creating users', () => {
         }),
 
         it('Post to /api/user with a duplicate username returns 409', done => {
-            
+
             User.count().then((count) => {
                 request(app)
                     .post('/api/user')
@@ -50,11 +53,11 @@ describe('Creating users', () => {
 })
 
 
- describe('Changing a password', () => {
+describe('Changing a password', () => {
 
-     it("Put to /api/user changes a users password", done => {
-             User.findOne({
-                 name: "beforeEachTestUser"
+    it("Put to /api/user changes a users password", done => {
+            User.findOne({
+                name: "beforeEachTestUser"
             }).then((user) => {
                 request(app)
                     .put("/api/user")
@@ -136,48 +139,48 @@ describe('Creating users', () => {
 describe('Removing a user', () => {
 
     it("Delete to /api/user with a non existant user returns 404", done => {
-        request(app)
-            .delete("/api/user")
-            .send({
-                name: "wrongUser",
-                password: "wrongPassword"
-            })
-            .expect(404)
-            .end((err, res) => {
-                assert(res.status === 404)
-                done()
-            })
-    }),
+            request(app)
+                .delete("/api/user")
+                .send({
+                    name: "wrongUser",
+                    password: "wrongPassword"
+                })
+                .expect(404)
+                .end((err, res) => {
+                    assert(res.status === 404)
+                    done()
+                })
+        }),
 
-    it("Delete to /api/user with wrong password returns 401", done => {
-        request(app)
-            .delete("/api/user")
-            .send({
-                name: "beforeEachTestUser",
-                password: "wrongPassword",
-            })
-            .expect(401)
-            .end((err, res) => {
-                assert(res.status === 401)
-                done()
+        it("Delete to /api/user with wrong password returns 401", done => {
+            request(app)
+                .delete("/api/user")
+                .send({
+                    name: "beforeEachTestUser",
+                    password: "wrongPassword",
+                })
+                .expect(401)
+                .end((err, res) => {
+                    assert(res.status === 401)
+                    done()
 
-            })
-    }),
-    it("Delete to /api/user deletes a user", done => {
-        request(app)
-                    .delete("/api/user")
-                    .send({
-                        name: "beforeEachTestUser",
-                        password: "beforeEachTestUser"
+                })
+        }),
+        
+        it("Delete to /api/user deletes a user", done => {
+            request(app)
+                .delete("/api/user")
+                .send({
+                    name: "beforeEachTestUser",
+                    password: "beforeEachTestUser"
+                })
+                .end((err, res) => {
+                    User.find({
+                        name: "beforeEachTestUser"
+                    }).then((deletedUser) => {
+                        assert(deletedUser.length === 0)
+                        done()
                     })
-                    .end((err, res) => {
-                        User.find({
-                            name: "beforeEachTestUser"
-                        }).then((deletedUser) => {
-                            assert(deletedUser.length === 0)
-                            done()
-                        })
-                    })
-    })
+                })
+        })
 })
-
