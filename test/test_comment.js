@@ -36,3 +36,30 @@ describe("Posting a comment", () =>{
         .catch((err)=> done(err))
     })
 })
+
+describe("Deleting a comment", () =>{
+    it("Delete /api/comment", done =>{
+        let foundComment;
+        Thread.findOne({
+            title: "beforeEachTestTitle"
+        })
+        .then((thread)=>{
+            return Comment.findOne({
+                thread: thread._id
+            })
+        })
+        .then((comment) =>{
+            foundComment = comment;
+            return request(app)
+            .delete("/api/comment/"+comment._id)
+        })
+        .then(() =>{
+            return Comment.findById(foundComment._id)
+        })
+        .then((comment)=>{
+            assert(comment.deleted)
+            done()
+        })
+        .catch((err)=> done(err))
+    })
+})
