@@ -8,7 +8,8 @@ module.exports = {
 
             Comment.find({
                 _id: req.params.id
-            }).then((foundComment) => {
+            })
+            .then((foundComment) => {
                 if (foundComment.length === 1) {
                     let comment = foundComment[0]
                     if(comment.upvotes.includes(req.body.username)){
@@ -68,6 +69,8 @@ module.exports = {
                 } else {
                     next(new ApiError("comment not found", 409))
                 }
+            }).catch((err) =>{
+                next( new ApiError(err.toString(), 400))
             })
     },
 
