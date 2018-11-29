@@ -9,8 +9,8 @@ const vote_routes = require('./src/routes/vote.routes')
 const morgan = require('morgan')
 
     if(process.env.NODE_ENV !== 'test'){
-		console.log("Mongoose is connected to Atlas remote DB")
-        Mongoose.connect("mongodb+srv://admin:admin123@studdit-ggmur.mongodb.net/test?retryWrites=true", { useNewUrlParser: true } );
+		console.log("Mongoose is connected to production Atlas remote DB")
+        Mongoose.connect("mongodb+srv://admin:admin123@studdit-ggmur.mongodb.net/production?retryWrites=true", { useNewUrlParser: true } );
 	}
 
 	

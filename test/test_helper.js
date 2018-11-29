@@ -1,19 +1,22 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 const User = require('../src/models/user')
 const request = require('supertest')
 const Thread = require('../src/models/thread')
+process.env.NODE_ENV = 'test'
 const app = require('../server')
 const neo4j = require('../src/neo4j/neo4jdriver')
 let session = neo4j.session()
 
 before(done => {
-    mongoose.connect('mongodb://localhost/suddit_test');
+    console.log("Mongoose is connected to test Atlas remote DB")
+    mongoose.connect("mongodb+srv://admin:admin123@studdit-ggmur.mongodb.net/test?retryWrites=true", { useNewUrlParser: true } );
     mongoose.connection
         .once('open', () => done())
         .on('error', err => {
             console.warn('Warning', err);
         });
 });
+
 beforeEach((done) => {
     const {
         users,
