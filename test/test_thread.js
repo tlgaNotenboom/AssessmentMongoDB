@@ -3,23 +3,6 @@ const request = require('supertest')
 const app = require('../server')
 const mongoose = require('mongoose')
 const Thread = mongoose.model('thread')
-
-describe("Creating Threads", () => {
-    it('Post to /api/thread creates a new thread', done => {
-        Thread.count()
-            .then((count) => {
-                request(app)
-                    .post('/api/comment')
-                    .send({
-                        content: "testComment",
-                        username: "beforeEachTestUsername",
-                        thread: "beforeEachTestTitle"
-                    })
-            })
-            .then(() => done())
-            .catch((err) => done(err))
-    });
-
     describe("Creating Threads", () => {
         it('Post to /api/thread creates a new thread', done => {
                 Thread.count()
@@ -92,4 +75,3 @@ describe("Creating Threads", () => {
                 })
         })
     })
-})
