@@ -9,7 +9,8 @@ const vote_routes = require('./src/routes/vote.routes')
 const morgan = require('morgan')
 
     if(process.env.NODE_ENV !== 'test'){
-    Mongoose.connect("mongodb+srv://admin:admin123@studdit-ggmur.mongodb.net/test?retryWrites=true", { useNewUrlParser: true } );
+		console.log("Mongoose is connected to production Atlas remote DB")
+        Mongoose.connect("mongodb+srv://admin:admin123@studdit-ggmur.mongodb.net/production?retryWrites=true", { useNewUrlParser: true } );
 	}
 
 	
@@ -27,7 +28,6 @@ let app = express();
 app.use(bodyParser.json())
 
 app.use(morgan("dev"));
-
 
 app.use("*", function(req, res, next) {
     next();

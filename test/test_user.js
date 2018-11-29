@@ -3,6 +3,8 @@ const request = require('supertest')
 const app = require('../server')
 const mongoose = require('mongoose')
 const User = mongoose.model('user')
+const neo4j = require('../src/neo4j/neo4jdriver')
+let session = neo4j.session()
 
 describe('Creating users', () => {
 
@@ -17,38 +19,82 @@ describe('Creating users', () => {
                     .end(() => {
                         User.count().then((newCount => {
                             assert(count + 1 === newCount);
-                            done()
+                            session.run("MATCH (u:User) WHERE u.name = 'createdTestUser' RETURN u")
+                                .then((res) => {
+                                    assert(res.records.length !== 0)
+                                    done()
+                                }).catch((err) => {
+                                    done(err)
+                                })
                         }))
                     })
             })
         }),
 
-        it('Post to /api/user with a duplicate username returns 409', done => {
-            
-            User.count().then((count) => {
-                request(app)
-                    .post('/api/user')
-                    .send({
-                        name: "beforeEachTestUser",
-                        password: "beforeEachTestUser"
-                    })
-                    .expect(409)
-                    .end((err, res) => {
-                        User.count().then((newCount => {
-                            assert(count === newCount && res.status === 409);
-                            done()
-                        }))
-                    })
-            })
+        it('Post to /api/user/friend adds a new friend', (done) => {
+            request(app)
+                .post('/api/user')
+                .send({
+                    name: "createdTestUser1",
+                    password: "createdTestUser"
+                })
+                .then(() => {
+                    return request(app)
+                        .post('/api/user')
+                        .send({
+                            name: "createdTestUser2",
+                            password: "createdTestUser"
+                        })
+                })
+                .then(() => {
+                    request(app)
+                        .post('/api/user/friend')
+                        .send({
+                            name1: "createdTestUser1",
+                            name2: "createdTestUser2"
+                        })
+                })
+                .then(() => {
+                    return session.run("MATCH (u:User)-[r:FRIEND]-(f:User) WHERE u.name = 'createdTestUser1' AND f.name = 'createdTestUser2' RETURN r ")
+                })
+                .then((res) => {
+                    assert(res.records !== 0)
+                    done()
+                })
+                .catch((err) => {
+                    done(err)
+                })
+        }).timeout(5000)
+
+        
+
+
+    it('Post to /api/user with a duplicate username returns 409', done => {
+
+        User.count().then((count) => {
+            request(app)
+                .post('/api/user')
+                .send({
+                    name: "beforeEachTestUser",
+                    password: "beforeEachTestUser"
+                })
+                .expect(409)
+                .end((err, res) => {
+                    User.count().then((newCount => {
+                        assert(count === newCount && res.status === 409);
+                        done()
+                    }))
+                })
         })
+    })
 })
 
 
- describe('Changing a password', () => {
+describe('Changing a password', () => {
 
-     it("Put to /api/user changes a users password", done => {
-             User.findOne({
-                 name: "beforeEachTestUser"
+    it("Put to /api/user changes a users password", done => {
+            User.findOne({
+                name: "beforeEachTestUser"
             }).then((user) => {
                 request(app)
                     .put("/api/user")
@@ -130,48 +176,91 @@ describe('Creating users', () => {
 describe('Removing a user', () => {
 
     it("Delete to /api/user with a non existant user returns 404", done => {
-        request(app)
-            .delete("/api/user")
-            .send({
-                name: "wrongUser",
-                password: "wrongPassword"
-            })
-            .expect(404)
-            .end((err, res) => {
-                assert(res.status === 404)
-                done()
-            })
-    }),
+            request(app)
+                .delete("/api/user")
+                .send({
+                    name: "wrongUser",
+                    password: "wrongPassword"
+                })
+                .expect(404)
+                .end((err, res) => {
+                    assert(res.status === 404)
+                    done()
+                })
+        }),
 
-    it("Delete to /api/user with wrong password returns 401", done => {
-        request(app)
-            .delete("/api/user")
-            .send({
-                name: "beforeEachTestUser",
-                password: "wrongPassword",
-            })
-            .expect(401)
-            .end((err, res) => {
-                assert(res.status === 401)
-                done()
-
-            })
-    }),
-    it("Delete to /api/user deletes a user", done => {
-        request(app)
-                    .delete("/api/user")
-                    .send({
-                        name: "beforeEachTestUser",
-                        password: "beforeEachTestUser"
-                    })
-                    .end((err, res) => {
-                        User.find({
-                            name: "beforeEachTestUser"
-                        }).then((deletedUser) => {
-                            assert(deletedUser.length === 0)
-                            done()
+        it("Delete to /api/user/friend deletes friend relation between users", (done) => {
+            request(app)
+                .post('/api/user')
+                .send({
+                    name: "createdTestUser1",
+                    password: "createdTestUser"
+                })
+                .then(() => {
+                    return request(app)
+                        .post('/api/user')
+                        .send({
+                            name: "createdTestUser2",
+                            password: "createdTestUser"
                         })
-                    })
-    })
-})
+                })
+                .then(() => {
+                    request(app)
+                        .post('/api/user/friend')
+                        .send({
+                            name1: "createdTestUser1",
+                            name2: "createdTestUser2"
+                        })
+                })
+                .then(() => {
+                    request(app)
+                    .delete('/api/user/friend')
+                        .send({
+                            name1: "createdTestUser1",
+                            name2: "createdTestUser2"
+                        })
+                })
+                .then(() => {
+                    return session.run("MATCH (u:User)-[r:FRIEND]-(f:User) WHERE u.name = 'createdTestUser1' AND f.name = 'createdTestUser2' RETURN r ")
+                })
+                .then((res) => {
+                    assert(res.records.length === 0)
+                    done()
+                })
+                .catch((err) => {
+                    done(err)
+                })
+        }).timeout(10000)
 
+        it("Delete to /api/user with wrong password returns 401", done => {
+            request(app)
+                .delete("/api/user")
+                .send({
+                    name: "beforeEachTestUser",
+                    password: "wrongPassword",
+                })
+                .expect(401)
+                .end((err, res) => {
+                    assert(res.status === 401)
+                    done()
+
+                })
+        }),
+
+        it("Delete to /api/user deletes a user", done => {
+            request(app)
+                .delete("/api/user")
+                .send({
+                    name: "beforeEachTestUser",
+                    password: "beforeEachTestUser"
+                })
+                .end((err, res) => {
+                    User.find({
+                        name: "beforeEachTestUser"
+                    }).then((deletedUser) => {
+                        assert(deletedUser.length === 0)
+                        done()
+                    })
+                })
+        })
+})
